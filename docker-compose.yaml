@@ -1,0 +1,34 @@
+# This is dockerized Playwright server
+# [TIP] Run Playwright Tests on unsupported Linux distributions
+# https://github.com/microsoft/playwright/issues/26482
+services:
+  playwright:
+    image: mcr.microsoft.com/playwright:v${PLAYWRIGHT_VERSION}-jammy
+    restart: always
+    init: true
+    ipc: host
+    environment:
+      - DISPLAY=:0.0
+    ports:
+      - "${PLAYWRIGHT_PORT:-3000}:3000"
+    command:
+      [
+        "/bin/sh",
+        -c,
+        "cd /home/pwuser && npx -y playwright@${PLAYWRIGHT_VERSION} run-server --port 3000"
+      ]
+    volumes:
+      - x11_socket:/tmp/.X11-unix
+  
+  novnc:
+    image: suchipi/novnc
+    command: xterm
+    environment:
+      - DISPLAY=:0.0
+    ports:
+      - "${NOVNC_PORT:-9090}:8080"
+    volumes:
+      - x11_socket:/tmp/.X11-unix
+
+volumes:
+  x11_socket: null
